@@ -1,1 +1,230 @@
-Success. continue 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ACCESS GRANTED</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for the snow/data canvas */
+        #snow-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -10; /* Ensure the data stream is behind all content */
+        }
+
+        /* Custom styles for the edgy hacker title effect */
+        .hacker-title {
+            /* Monospace font for the terminal look */
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+            /* Aggressive Neon Green Glow */
+            text-shadow: 
+                0 0 5px #0f0,
+                0 0 10px #0f0,
+                0 0 20px #0f0,
+                0 0 40px #0f0, /* Primary green glow */
+                0 0 80px #0f0,
+                0 0 90px #0f0;
+            
+            word-break: break-word; 
+            letter-spacing: 0.1em; /* Widen spacing for digital look */
+        }
+
+        /* Styles for the dynamically generated floating console text */
+        .floating-console {
+            position: fixed;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+            text-shadow: 0 0 3px #0f0; 
+            color: rgba(0, 255, 0, 0.7); /* Slightly transparent */
+            z-index: 5;
+            max-width: 300px;
+            overflow: hidden;
+            pointer-events: none; /* Ignore mouse events */
+            transition: opacity 1s ease-out; /* Smooth fade-out */
+            opacity: 0; /* Starts invisible */
+            font-size: 0.75rem; /* Small text size */
+            line-height: 1.1;
+        }
+
+    </style>
+</head>
+<body class="bg-black text-white min-h-screen flex flex-col items-center justify-center relative p-4">
+
+    <!-- Canvas for the Data Stream Effect (Z-index ensures it's in the background) -->
+    <canvas id="snow-canvas"></canvas>
+
+    <!-- Main Content Container - STATICALLY CENTERED -->
+    <div id="main-title-container" class="z-20 max-w-5xl w-full text-center">
+        <!-- Hacker Style Title with exact requested text -->
+        <h1 class="hacker-title text-5xl sm:text-7xl lg:text-8xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-lime-400 to-green-600 rounded-xl p-4 leading-tight">
+            Success, continue to the app
+        </h1>
+    </div>
+    <!-- Floating console text will be appended here by JavaScript -->
+
+    <!-- JavaScript for Data Stream and Dynamic Floating Text -->
+    <script>
+        // Set up the canvas and context
+        const canvas = document.getElementById('snow-canvas');
+        const ctx = canvas.getContext('2d');
+        let flakes = [];
+        let maxFlakes = 200; 
+
+        // --- Data Point Class (Snow/Rain) ---
+        class DataPoint {
+            constructor() {
+                this.radius = Math.random() * 2 + 1; 
+                this.density = Math.random() * 3 + 1; 
+                this.speed = 1.5 + Math.random() * this.density; 
+                this.y = Math.random() * canvas.height; 
+                this.x = Math.random() * canvas.width;  
+                this.angle = Math.random() * 360; 
+            }
+
+            update() {
+                this.x += Math.sin(this.angle) * 0.8;
+                this.angle += 0.02;
+                this.y += this.speed;
+
+                if (this.y > canvas.height) {
+                    this.y = -this.radius; 
+                    this.x = Math.random() * canvas.width; 
+                    this.speed = 1.5 + Math.random() * this.density;
+                    this.angle = Math.random() * 360;
+                }
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = "rgba(0, 255, 0, 0.6)"; 
+                ctx.fill();
+                ctx.closePath();
+            }
+        }
+
+        // --- Canvas and Data Stream Functions ---
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            initDataStream(); 
+        }
+
+        function initDataStream() {
+            flakes = []; 
+            maxFlakes = window.innerWidth < 640 ? 120 : 200; 
+            for (let i = 0; i < maxFlakes; i++) {
+                flakes.push(new DataPoint());
+            }
+        }
+
+        function animateDataStream() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            flakes.forEach(flake => {
+                flake.update();
+                flake.draw();
+            });
+
+            requestAnimationFrame(animateDataStream);
+        }
+
+        // --- Random Console Text Functions ---
+        function generateRandomConsoleText(lineCount = 10) {
+            const commands = [
+                'SCANNING_PORT_8080...', 
+                'INIT::SYN-ACK-FLOOD', 
+                'AUTHENTICATION_FAILED:401', 
+                'BUFFER_OVERFLOW_ATTEMPT', 
+                'DECRYPTING_AES_256...',
+                'USER::ROOT_LOGIN_SUCCESS',
+                'SYSTEM::ESTABLISHED_SHELL',
+                'INJECTING_PAYLOAD...',
+                '// ACCESS VECTOR CONFIRMED',
+                '// INITIALIZING PROXY CHAIN'
+            ];
+            const hexChars = '0123456789ABCDEF';
+            let output = '';
+
+            for (let i = 0; i < lineCount; i++) {
+                if (Math.random() < 0.3) {
+                    // 30% chance of a command line
+                    output += `> ${commands[Math.floor(Math.random() * commands.length)]}\n`;
+                } else {
+                    // 70% chance of random hex data
+                    let line = '';
+                    for (let j = 0; j < 12; j++) {
+                        line += hexChars[Math.floor(Math.random() * 16)];
+                        line += hexChars[Math.floor(Math.random() * 16)];
+                        line += (j % 2 === 1 && j !== 11) ? ' ' : '';
+                    }
+                    output += `0x${line}\n`;
+                }
+            }
+            return output;
+        }
+
+        // --- Dynamic Floating Console Function (NEW) ---
+        function animateFloatingConsole() {
+            const body = document.body;
+            
+            // 1. Create the floating element
+            const consoleDiv = document.createElement('div');
+            consoleDiv.className = 'floating-console absolute p-2';
+            consoleDiv.textContent = generateRandomConsoleText(Math.floor(Math.random() * 5) + 5); // 5 to 10 lines
+
+            // 2. Set random position (within safe boundaries)
+            // Use window size to set boundaries
+            const vw = window.innerWidth;
+            const vh = window.innerHeight;
+            
+            // Random position that keeps the block mostly visible (10% to 80% of screen)
+            const randomX = Math.random() * (vw * 0.7) + (vw * 0.1); 
+            const randomY = Math.random() * (vh * 0.7) + (vh * 0.1); 
+
+            consoleDiv.style.left = `${randomX}px`;
+            consoleDiv.style.top = `${randomY}px`;
+            
+            // 3. Add to DOM and fade in
+            body.appendChild(consoleDiv);
+            
+            // Request animation frame ensures the opacity transition works
+            requestAnimationFrame(() => {
+                consoleDiv.style.opacity = '1'; 
+            });
+
+            // 4. Fade out and remove after a duration
+            const duration = 1500 + Math.random() * 1000; // 1.5 to 2.5 seconds visible
+            
+            setTimeout(() => {
+                consoleDiv.style.opacity = '0'; // Start fade out
+                
+                // Remove the element after the transition (1s) is complete
+                setTimeout(() => {
+                    consoleDiv.remove();
+                }, 1000); 
+
+            }, duration);
+
+
+            // Schedule the next floating console creation
+            const nextDelay = 300 + Math.random() * 700; // New console every 300ms to 1s
+            setTimeout(animateFloatingConsole, nextDelay);
+        }
+
+
+        // --- Event listeners ---
+        window.addEventListener('resize', resizeCanvas);
+        window.addEventListener('load', () => {
+            resizeCanvas(); // Initial setup
+            animateDataStream();  // Start the background animation
+            animateFloatingConsole(); // Start the dynamic text feed
+        });
+
+    </script>
+</body>
+</html>
